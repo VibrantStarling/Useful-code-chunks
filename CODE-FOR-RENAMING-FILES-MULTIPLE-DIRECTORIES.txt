@@ -1,0 +1,3 @@
+## ADDING PREFIXES METABAT BINS IN DIFFERENT FOLDERS
+
+for i in $(cat test); do cd ${i}/*metabat*/; for file in $(ls *.fa); do  name="${i}_${file}"; mv -vi ./${file} ./${name};  done; cd ../../; done
