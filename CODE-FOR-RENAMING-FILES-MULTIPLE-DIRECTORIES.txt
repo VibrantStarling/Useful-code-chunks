@@ -1,3 +1,24 @@
+#!/bin/bash
+
 ## ADDING PREFIXES METABAT BINS IN DIFFERENT FOLDERS
 
-for i in $(cat test); do cd ${i}/*metabat*/; for file in $(ls *.fa); do  name="${i}_${file}"; mv -vi ./${file} ./${name};  done; cd ../../; done
+for i in $(cat $1)
+do
+
+files=$(ls ${i}/*metabat*/* | wc -l )
+
+if (($files > 0)); then 
+        echo "renaming"
+        cd ${i}/*metabat*/
+        for file in $(ls *.fa)
+        do  name="${i}_${file}"
+        mv -vi ./${file} ./${name}
+        done
+        cd ../../
+        echo "done renaming"
+else
+        echo "leaving alone" 
+fi
+
+done
+
