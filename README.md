@@ -12,3 +12,13 @@ Pieces of code that make life easier, but I would otherwise probably forget the 
 
 for i in $(cat names); do cd ${i}/*metabat*/; for file in $(ls *.fa); do  name="${i}_${file}"; mv -vi ./${file} ./${name};  done; cd ../../; done
 ```
+
+
+## Running Phyloflash and computing average read length
+> Calculate your read length and feed it directly into Phyloflash. 
+> This chunk is only suited to single paired end read samples that already have their own directory. Please adapt this code to your own filing system if you have multiple samples to process! Also check your fastq file names match the format in this code chunk!
+```
+# run runPhloflash.sh with a text list of file prefixes
+
+bash runPhyloflash [inputfile name]
+```
