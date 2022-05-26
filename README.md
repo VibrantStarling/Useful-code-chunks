@@ -44,3 +44,12 @@ done
 ## get average bin depth
 cut -f3 bin-depths.txt | awk '{s+=$1}END{print "ave:",s/NR}'
 ```
+## Calculate GC content
+use `gc-calculator.sh` as follows
+```
+# for one file
+bash ~/scripts/gc-calculator.sh fasta.fa
+
+# for multiple files
+for i in $(ls *.fa); do bash ~/scripts/gc-calculator.sh ${i}; done
+```
