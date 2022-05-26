@@ -22,3 +22,26 @@ for i in $(cat names); do cd ${i}/*metabat*/; for file in $(ls *.fa); do  name="
 
 bash ~/scripts/runPhyloflash.sh [inputfile name]
 ```
+## get the number of bp for a bunch of fasta files
+
+```
+for i in $(ls *.fa)
+do 
+grep -v ">" ${i} | wc | awk -v var=${i} '{print var," = ",$3-$1}'
+done
+```
+
+## Get coverage for a metabat bin from megahit final contigs depths
+```
+## get a list of contig names
+grep ">" bin.fa
+sed 's/>//g' contigs.txt -i
+
+## cross reference the deopth file from the megahit assembly
+for i in $(cat contigs.txt)
+do grep ${i} contigs.fa.depth.txt >> HoloClent4-depths.txt
+done
+
+## get average bin depth
+cut -f3 bin-depths.txt | awk '{s+=$1}END{print "ave:",s/NR}'
+```
