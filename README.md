@@ -34,12 +34,11 @@ done
 ## Get coverage for a metabat bin from megahit final contigs depths
 ```
 ## get a list of contig names
-grep ">" bin.fa
-sed 's/>//g' contigs.txt -i
+grep ">" bin.fa | sed 's/>//g' > contigs.txt
 
 ## cross reference the deopth file from the megahit assembly
 for i in $(cat contigs.txt)
-do grep ${i} contigs.fa.depth.txt >> HoloClent4-depths.txt
+do grep -w ${i} contigs.fa.depth.txt >> bin-depths.txt
 done
 
 ## get average bin depth
