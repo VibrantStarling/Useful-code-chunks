@@ -55,6 +55,9 @@ for i in $(ls *.fa); do bash ~/scripts/gc-calculator.sh ${i}; done
 ```
 ## Calculate N50, N90, length, number of contigs and largest contig
 Use this script https://github.com/hcdenbakker/N50.sh/blob/682bc724ecad22559e2fcd8ef8bcfc48ed1e8e5f/N50.sh
+```
+bash N50-calculator.sh your-genome.fa
+```
 
 ## Calculate average CDS size 
 you will need a prokka ouput .tsv file as an input
@@ -63,6 +66,7 @@ cat *.tsv | awk '$2 == "CDS"'| awk '{total += $3} END {print total/NR}'
 ```
 
 ## Calculate coding density
+Prokka will give you the number of predicted CDS, and you can use its tsv output to calculate the average CDS length.
 `$1 = avg. CDS length (bp)`
 `$2 = number of CDS`
 `$3 = genome length (bp)`
