@@ -176,7 +176,6 @@ Find matching gene models that might share gene IDs.
     # inputs and names
     query_aa = args.query_aa
     subject_aa = args.subject_aa
-    plot = args.plot
     outName = args.output
 
     # define outputs
@@ -186,6 +185,7 @@ Find matching gene models that might share gene IDs.
     rev_out = os.path.join(outdir, outName+'-rev-results.tab')
 
     # run the functions
+    run_reciprocal_BLAST(query_aa, subject_aa, fwd_out, rev_out)
     fwd_results, rev_results = normalise_blast_results(fwd_out, rev_out)
     rbbh = identify_reciprocal_best_matches(fwd_results, rev_results, outName, outdir)
     make_plots(fwd_results, rev_results, rbbh, outName, outdir)
