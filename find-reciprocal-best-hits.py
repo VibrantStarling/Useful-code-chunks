@@ -13,14 +13,14 @@ from Bio.Blast.Applications import NcbiblastpCommandline
 from matplotlib.colors import LogNorm
 
 
-def run_reciprocal_BLAST(query_aa, subject_aa, fwd_out, rev_out):
+def run_reciprocal_BLAST(query_aa, subject_aa, fwd_out, rev_out, threads):
     # Create BLAST command-lines for forward and reverse BLAST searches
     fwd_blastp = NcbiblastpCommandline(query=query_aa, subject=subject_aa, out=fwd_out,
                                     outfmt='6 qseqid sseqid pident qcovs qlen slen length bitscore evalue',
-                                    max_target_seqs=1)
+                                    max_target_seqs=1, num_threads=threads)
     rev_blastp = NcbiblastpCommandline(query=subject_aa, subject=query_aa, out=rev_out,
                                     outfmt='6 qseqid sseqid pident qcovs qlen slen length bitscore evalue',
-                                    max_target_seqs=1)
+                                    max_target_seqs=1, num_threads=threads)
     
     # Inspect command-lines
     print("\033[46m {}\033[0;0m".format('BLAST searches to be run: '))
@@ -76,7 +76,7 @@ def identify_reciprocal_best_matches(fwd_results, rev_results, outName, outdir):
     rbbh = rbbh.loc[rbbh.query_x == rbbh.subject_y]
     # Group duplicate RBH rows, taking the maximum value in each column
     rbbh = rbbh.groupby(['query_x', 'subject_x']).max()
-    path = os.path.join(outdir,outName+"_rbbh.tsv")
+    path = os.path.join(outdir,outName+"_rbbh.csv")
     rbbh.to_csv(path, index=None, header=True)
     return rbbh
 
@@ -171,12 +171,16 @@ Find matching gene models that might share gene IDs.
     parser.add_argument('-o','--output', \
                     help="Name for outputs",
                     required=True)
+    parser.add_argument('-t','--num_threads', \
+                    help="Number of threads to use for blast searches",
+                    required=True)
     args = parser.parse_args()
 
     # inputs and names
     query_aa = args.query_aa
     subject_aa = args.subject_aa
     outName = args.output
+    threads = args.num_threads
 
     # define outputs
     outdir = os.path.join(os.getcwd(), outName+"-RBH-results")
@@ -185,7 +189,7 @@ Find matching gene models that might share gene IDs.
     rev_out = os.path.join(outdir, outName+'-rev-results.tab')
 
     # run the functions
-    run_reciprocal_BLAST(query_aa, subject_aa, fwd_out, rev_out)
+    run_reciprocal_BLAST(query_aa, subject_aa, fwd_out, rev_out, threads)
     fwd_results, rev_results = normalise_blast_results(fwd_out, rev_out)
     rbbh = identify_reciprocal_best_matches(fwd_results, rev_results, outName, outdir)
     make_plots(fwd_results, rev_results, rbbh, outName, outdir)
