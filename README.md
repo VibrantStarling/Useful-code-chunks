@@ -99,20 +99,33 @@ agat_sp_extract_sequences.pl -g GFF -f corresponding_fasta -t exon --aa --merge 
 ```
 
 ## Calculate reciprocal best hits with `find-reciprocal-best-hits.py` <a name="10"></a>
+
 Calculate reciprocal best hits and make some nice histograms and density plots
 Based on code from [here](https://widdowquinn.github.io/2018-03-06-ibioic/02-sequence_databases/05-blast_for_rbh.html)
 
-Usage:
+**Usage:**
 ```
 find-reciprocal-best-hits.py [-h] -s1 QUERY_AA -s2 SUBJECT_AA -o OUTPUT
-```
 
-Options:
+optional arguments:
+  -h, --help    show this help message and exit
+  -s1 QUERY_AA, --query_aa QUERY_AA   
+                one set of aa sequence
+  -s2 SUBJECT_AA, --subject_aa SUBJECT_AA    
+                second set of aa sequence
+  -o OUTPUT, --output OUTPUT    
+                Name for outputs
 ```
--h, --help    show this help message and exit
--s1 QUERY_AA, --query_aa QUERY_AA    one set of aa sequence
--s2 SUBJECT_AA, --subject_aa SUBJECT_AA    second set of aa sequence
--o OUTPUT, --output OUTPUT    Name for outputs
-```
+**Output:**
+Blast results for forward and reverse reads:
+
+-`outputName-fwd-results.tab`
+-`outputName-rev-results.tab`
+
+Reciprocal best hits:
+
+-`Cposadasi-test-rbbh.csv`
+- histograms of normalised bitscores for forward, reverse and reciprocal reads:
+- 2D density plots of normalised bitscores for forward, reverse and reciprocal reads:
 
 
