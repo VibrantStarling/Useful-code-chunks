@@ -3,6 +3,7 @@ Pieces of code that make life easier, but I would otherwise probably forget the 
 
 # File handling
 1. [Mass rename files in different directories](#1)
+2. [Replace multiple pairs of patterns from a tab delimited list](#10)
 
 # Running programmes with additional bits
 1. [Run PhyloFlash and get average read lengths](#2)
@@ -28,6 +29,18 @@ Pieces of code that make life easier, but I would otherwise probably forget the 
 for i in $(cat names); do cd ${i}/*metabat*/; for file in $(ls *.fa); do  name="${i}_${file}"; mv -vi ./${file} ./${name};  done; cd ../../; done
 ```
 
+## Replace multiple pairs of patterns from a tab delimited list <a name="10"></a>
+> Do a whole bunch of replacements on one file from a tab delimited list
+```
+while read a b; do sed -i "s/${b}/${a}/g" target-file.txt; echo ${a}; done < pattern-pairs-list.txt
+```
+The `pattern-pairs-list.txt` should be formatted like:
+```
+new_pattern_1  old_pattern_1
+new_pattern_2  old_pattern_2
+new_pattern_3  old_pattern_3
+new_pattern_4  old_pattern_4
+```
 
 ## Running Phyloflash and computing average read length <a name="2"></a>
 > Calculate your read length and feed it directly into [PhyloFlash](http://hrgv.github.io/phyloFlash/ "PhyloFlash Manual"). 
