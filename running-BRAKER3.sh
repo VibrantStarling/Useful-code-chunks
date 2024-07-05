@@ -52,10 +52,16 @@ RepeatModeler -database ${DB} -threads 72 -LTRStruct
 RepeatMasker -pa 72 -lib ${DB}-families.fa -xsmall ${GENOME}
 
 # run HiSAT2 or STAR to align (braker3 documentation suggests hisat)
-hisat2 -p 32 -q -x genome-idx -1 ${RNASEQ_FWD} -2 ${RNASEQ_REV} -S ${RNA_PREFIX}-hisat2-aligned-rnaseq.sam 1> hisat2-align.log 2> hisat2-align.err
+# paired
+hisat2 -p 32 -q -x genome-idx -1 ${RNASEQ_FWD} -2 ${RNASEQ_REV} > ${RNA_PREFIX}-hisat2-paired-aligned-rnaseq.sam  2> hisat2-paired-align.err
+# unpaired
+hisat2 -p 32 -q -x genome-idx -U ${RNASEQ_FASTQ} > ${RNA_PREFIX}-hisat2-unpaired-aligned-rnaseq.sam  2> hisat2-unpaired-align.err
 
-# Align with HiSAT2 which is included in the BRAKER container (is part of the BRAKER3 pipeline)
-singularity exec -B ${PWD}:${PWD} braker3.sif braker.pl --genome=${GENOME} --prot_seq=~/BRAKER_DB/alveolata.fa --rnaseq_sets_ids=${RNA_FASTQ1},${RNA_FASTQ2} 
---rnaseq_sets_dirs=./
+#convert sam to bam
+samtools view -bS rnaseq.sam | samtools sort - rnaseq_sorted.bam
+rm rnaseq.sam
+
+# put the aligned bam into BRAKER along with the appropriate orthodb database https://bioinf.uni-greifswald.de/bioinf/partitioned_odb11/
+singularity exec -B ${PWD}:${PWD},~/ ~/braker3.sif braker.pl --genome=${GENOME} --prot_seq=~/BRAKER-DB/Alveolata.fa --bam=${SORTED_BAM}
 
 
