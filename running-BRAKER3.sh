@@ -52,16 +52,24 @@ RepeatModeler -database ${DB} -threads 72 -LTRStruct
 RepeatMasker -pa 72 -lib ${DB}-families.fa -xsmall ${GENOME}
 
 # run HiSAT2 or STAR to align (braker3 documentation suggests hisat)
+hisat2-build ${GENOME} ${IDX}
 # paired
-hisat2 -p 32 -q -x genome-idx -1 ${RNASEQ_FWD} -2 ${RNASEQ_REV} > ${RNA_PREFIX}-hisat2-paired-aligned-rnaseq.sam  2> hisat2-paired-align.err
+hisat2 -p 32 -q -x ${IDX} -1 ${RNASEQ_FWD} -2 ${RNASEQ_REV} > ${RNA_PREFIX}-hisat2-paired-aligned-rnaseq.sam  2> ${RNA_PREFIX}-hisat2-paired-align.err
 # unpaired
-hisat2 -p 32 -q -x genome-idx -U ${RNASEQ_FASTQ} > ${RNA_PREFIX}-hisat2-unpaired-aligned-rnaseq.sam  2> hisat2-unpaired-align.err
+hisat2 -p 32 -q -x genome-idx -U ${RNASEQ_FASTQ} > ${RNA_PREFIX}-hisat2-unpaired-aligned-rnaseq.sam  2> ${RNA_PREFIX}-hisat2-unpaired-align.err
 
 #convert sam to bam
-samtools view -bS rnaseq.sam | samtools sort - rnaseq_sorted.bam
-rm rnaseq.sam
+samtools view -bS ${RNA_PREFIX}-rnaseq.sam -o ${RNA_PREFIX}-rnaseq.bam
+samtools sort ${RNA_PREFIX}-rnaseq.bam -o ${RNA_PREFIX}-rnaseq_sorted.bam
+rm ${RNA_PREFIX}-rnaseq.sam
 
 # put the aligned bam into BRAKER along with the appropriate orthodb database https://bioinf.uni-greifswald.de/bioinf/partitioned_odb11/
-singularity exec -B ${PWD}:${PWD},~/ ~/braker3.sif braker.pl --genome=${GENOME} --prot_seq=~/BRAKER-DB/Alveolata.fa --bam=${SORTED_BAM}
+T=32
+SORTED_BAM="rnaseq_sorted.bam"
+HOME=$(ls ~/)
+singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/braker3.sif braker.pl --genome=${GENOME} --prot_seq=${HOME}/BRAKER-DB/Alveolata.fa --bam=${SORTED_BAM} --threads=${T}
 
+agat_convert_sp_gxf2gxf.pl -g braker/braker.gtf -o braker/braker.gff
+gffcompare braker/braker.gff ToxoDB-to-NCBI-ME49-cds-content-check/GCF_000006565.2_TGA4_genomic_d1_f1.0_lifted_annotations-AGAT-phase-fixed_changes_marked.gff -r GCF_000006565.2_TGA4_genomic.gff -o gffcomp-excl-toxo-from-prot-db
+gffcompare braker/braker.gff -r ToxoDB-to-NCBI-ME49-cds-content-check/GCF_000006565.2_TGA4_genomic_d1_f1.0_lifted_annotations-AGAT-phase-fixed_changes_marked.gff -o braker-vs-toxodb-excl-toxo-from-protein-db
 
