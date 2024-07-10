@@ -67,9 +67,13 @@ rm ${RNA_PREFIX}-rnaseq.sam
 T=32
 SORTED_BAM="rnaseq_sorted.bam"
 HOME=$(ls ~/)
-singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/braker3.sif braker.pl --genome=${GENOME} --prot_seq=${HOME}/BRAKER-DB/Alveolata.fa --bam=${SORTED_BAM} --threads=${T}
+singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/braker3.sif braker.pl --genome=${GENOME} \
+--prot_seq=${HOME}/BRAKER-DB/Alveolata.fa --bam=${SORTED_BAM} --threads=${T} --gff3
 
+# convert the gtf output inro a gff
+conda activate agatenv
 agat_convert_sp_gxf2gxf.pl -g braker/braker.gtf -o braker/braker.gff
+conda deactivate
+# compare gffs
 gffcompare braker/braker.gff ToxoDB-to-NCBI-ME49-cds-content-check/GCF_000006565.2_TGA4_genomic_d1_f1.0_lifted_annotations-AGAT-phase-fixed_changes_marked.gff -r GCF_000006565.2_TGA4_genomic.gff -o gffcomp-excl-toxo-from-prot-db
 gffcompare braker/braker.gff -r ToxoDB-to-NCBI-ME49-cds-content-check/GCF_000006565.2_TGA4_genomic_d1_f1.0_lifted_annotations-AGAT-phase-fixed_changes_marked.gff -o braker-vs-toxodb-excl-toxo-from-protein-db
-
