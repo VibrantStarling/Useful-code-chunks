@@ -40,8 +40,8 @@ trimmomatic SE -phred33 -threads 32 ${FILE} ${FILE}_qc.fq ILLUMINACLIP:adapters.
 done
 
 # define the trimmed file objects
-RNASEQ_FWD=$(${RNA_PREFIX}+"_1.fastq_qc.fq")
-RNASEQ_REV=$(${RNA_PREFIX}+"_2.fastq_qc.fq")
+RNASEQ_FWD=${RNA_PREFIX}_1.fastq.fq;
+RNASEQ_REV=${RNA_PREFIX}_2.fastq.fq
 
 # soft mask reads with TETools repeatmodler2 and repeatmasker. 
 #    > can struggle if memory is not fast enough and data may need to be stored on compute HPC nodes
@@ -52,22 +52,44 @@ RepeatModeler -database ${DB} -threads 72 -LTRStruct
 RepeatMasker -pa 72 -lib ${DB}-families.fa -xsmall ${GENOME}
 
 # run HiSAT2 or STAR to align (braker3 documentation suggests hisat)
-hisat2-build ${GENOME} ${IDX}
-# paired
-hisat2 -p 32 -q -x ${IDX} -1 ${RNASEQ_FWD} -2 ${RNASEQ_REV} > ${RNA_PREFIX}-hisat2-paired-aligned-rnaseq.sam  2> ${RNA_PREFIX}-hisat2-paired-align.err
-# unpaired
-hisat2 -p 32 -q -x genome-idx -U ${RNASEQ_FASTQ} > ${RNA_PREFIX}-hisat2-unpaired-aligned-rnaseq.sam  2> ${RNA_PREFIX}-hisat2-unpaired-align.err
+# simplify genome contig names so braker can handle them
+IDX=""
+GENOME=""
+sed -i 's/\s.*$//' ${GENOME}
+time hisat2-build ${GENOME} ${IDX}
 
-#convert sam to bam
-samtools view -bS ${RNA_PREFIX}-rnaseq.sam -o ${RNA_PREFIX}-rnaseq.bam
-samtools sort ${RNA_PREFIX}-rnaseq.bam -o ${RNA_PREFIX}-rnaseq_sorted.bam
-rm ${RNA_PREFIX}-rnaseq.sam
+# paired with a list of SRA names (SRRXXXXXX) to align 
+for i in $(cat names)
+do 
+RNASEQ_FWD=${i}_1.fastq.gz
+RNASEQ_REV=${i}_2.fastq.gz
+time hisat2 -p 32 -q -x ${IDX} -1 ${RNASEQ_FWD} -2 ${RNASEQ_REV} > ${i}-hisat2-rnaseq.sam  2> ${i}-hisat2-align.err
+samtools view -bS ${i}-hisat2-rnaseq.sam -o ${i}-hisat2-rnaseq.bam
+samtools sort ${i}-hisat2-rnaseq.bam -o ${i}-hisat2-rnaseq_sorted.bam
+rm ${i}-hisat2-rnaseq.sam; rm ${i}-hisat2-rnaseq.bam
+done
+
+# unpaired with a list of SRA names (SRRXXXXXX) to align 
+for i in $(cat names)
+do 
+RNASEQ=${i}.fastq.gz
+time hisat2 -p 32 -q -x ${IDX} -U ${RNASEQ} > ${i}-hisat2-rnaseq.sam  2> ${i}-hisat2-align.err
+samtools view -bS ${i}-hisat2-rnaseq.sam -o ${i}-hisat2-rnaseq.bam
+samtools sort ${i}-hisat2-rnaseq.bam -o ${i}-hisat2-rnaseq_sorted.bam
+rm ${i}-hisat2-rnaseq.sam; rm ${i}-hisat2-rnaseq.bam
+done
+
+# merge bam files
+ls unpaired/*sorted.bam >> bam-files
+ls paired/*sorted.bam >> bam-files
+NAME=$(basename -s .fna ${GENOME}
+samtools merge -b bam-files -o ${NAME}-merged.bam --threads 12
 
 # put the aligned bam into BRAKER along with the appropriate orthodb database https://bioinf.uni-greifswald.de/bioinf/partitioned_odb11/
 T=32
 SORTED_BAM="rnaseq_sorted.bam"
 HOME=$(ls ~/)
-singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/braker3.sif braker.pl --genome=${GENOME} \
+time singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/braker3.sif braker.pl --genome=${GENOME} \
 --prot_seq=${HOME}/BRAKER-DB/Alveolata.fa --bam=${SORTED_BAM} --threads=${T} --gff3
 
 # convert the gtf output inro a gff
