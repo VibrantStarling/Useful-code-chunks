@@ -16,6 +16,7 @@ Pieces of code that make life easier, but I would otherwise probably forget the 
 5. [Calculate average CDS size](#7)
 9. [Get aa sequence from a gff](#8)
 10. [Calculate reciprocal best hits](#9)
+11. [Get bam file statistics with samtools](#11)
 
 ## Mass rename files in different directories <a name="1"></a>
 > How to mass rename files with specific prefixes in multiple different directories so file names are more informative. (Just incase you forget to add the option in programmes like metabat and have about 500 files that need prefixes)
@@ -141,4 +142,18 @@ Reciprocal best hits:
 - histograms of normalised bitscores for forward, reverse and reciprocal reads:
 - 2D density plots of normalised bitscores for forward, reverse and reciprocal reads:
 
+## Get bam file statistics with samtools <a name="11"></a>
+Run this in a directory that contains bam files, preferably sorted bam files
 
+```
+for i in $(ls *.bam)
+do echo "SAMTOOLS FLAGSTAT" > ${i}_stats
+echo "" >> ${i}_stats
+samtools flagstat ${i} >> ${i}_stats
+echo "" >> ${i}_stats
+echo "" >> ${i}_stats
+echo "SAMTOOLS STAT" >> ${i}_stats
+echo "" >> ${i}_stats
+samtools stats ${i} |grep ^SN | cut -f 2- >> ${i}_stats
+done
+```
