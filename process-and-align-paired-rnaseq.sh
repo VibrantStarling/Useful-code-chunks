@@ -52,17 +52,13 @@ do
 
     # trim the fastq file with trimmomatic
     tput setaf 6; echo "------START of trimming for ${RNA_PREFIX}"; tput sgr0
-    tput setaf 5; echo "trimming ${RNASEQ_FWD}"; tput sgr0
-    trimmomatic SE -phred33 -threads 32 ${RNASEQ_FWD} ${RNA_PREFIX}_1_qc.fq ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
-    tput setaf 5; echo "trimming ${RNASEQ_REV}"; tput sgr0
-    trimmomatic SE -phred33 -threads 32 ${RNASEQ_REV} ${RNA_PREFIX}_2_qc.fq ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
-    tput setaf 2; echo "trimming complete"; tput sgr0
+    trimmomatic SE -phred33 -threads 32 ${RNASEQ_FWD} ${RNASEQ_REV} ${RNA_PREFIX}_fpaired.fq.gz ${RNA_PREFIX}_fupaired.fq.gz ${RNA_PREFIX}_funpaired.fq.gz ${RNA_PREFIX}_rpaired.fq.gz ${RNA_PREFIX}_runpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
     tput setaf 2; echo "------END of  trimming for ${RNA_PREFIX}------"; tput sgr0
     echo
 
     # define the trimmed file objects
-    RNASEQ_FWD=${RNA_PREFIX}_1_qc.fq
-    RNASEQ_REV=${RNA_PREFIX}_2_qc.fq
+    RNASEQ_FWD=${RNA_PREFIX}_fpaired.fq.gz
+    RNASEQ_REV=${RNA_PREFIX}_rpaired.fq.gz
 
     # paired with a list of SRA names (SRRXXXXXX) to align 
     tput setaf 6; echo "------START of alignment for ${RNA_PREFIX}"; tput sgr0
