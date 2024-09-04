@@ -7,6 +7,7 @@ Pieces of code that make life easier, but I would otherwise probably forget the 
 
 # Running programmes with additional bits
 1. [Run PhyloFlash and get average read lengths](#2)
+2. [Process and align paired rnaseq reads](#12)
 
 # Genome statistics
 1. [Get No. bp for multiple files](#3)
@@ -51,6 +52,33 @@ new_pattern_4  old_pattern_4
 
 bash ~/scripts/runPhyloflash.sh [inputfile name]
 ```
+## Process and align paired rnaseq reads <a name="12"></a>
+This script will softmask a genome to prepare it for rnaseq alignment. It will then take a list of SRA numbers for paired rnaseq data, trim those files and align them to the masked genome.
+
+**Dependancies**
+```
+# singularity image for dfam-TEtool (dfam-tetools-latest.sif) in your home directory
+singularity pull dfam-tetools-latest.sif docker://dfam/tetools:latest
+# hisat2
+conda install bioconda::hisat2
+# trimmomatic
+conda install bioconda::trimmomatic
+# samtools
+conda install bioconda::samtools
+```
+**Inputs**
+
+1 - a list of SRA numbers (e.g. SRR6493555) for paired rnaseq sets with each number on a new line
+
+2 - the genome to mask and align rnaseq to. Must end in the extension `.fna`
+
+3 - the name for the masked genome database
+
+**Useage**
+```
+bash process_and_align_paired_rnaseq.sh sra_list genome.fna genome_db_name_prefix
+```
+
 ## get the number of bp for a bunch of fasta files <a name="3"></a>
 
 ```
