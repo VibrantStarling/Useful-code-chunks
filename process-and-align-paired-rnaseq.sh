@@ -12,6 +12,8 @@
 #        Use: conda install bioconda::trimmomatic
 # samtools
 #        Use: conda install bioconda::samtools
+# fastq-pair
+#       conda install bioconda::fastq-pair
 
 # INPUTS
 # 1 - a list of SRA numbers (e.g. SRR6493555) for paired rnaseq sets with each number on a new line
@@ -45,14 +47,18 @@ tput setaf 2; echo "softmasking complete"; tput sgr0
 
 # clean and align SRA to the genome
 for RNA_PREFIX in $(cat ${SRA_LIST})
-do
+
     # define the file objects
     RNASEQ_FWD=${RNA_PREFIX}_1.fastq.gz
     RNASEQ_REV=${RNA_PREFIX}_2.fastq.gz
-
+    
     # trim the fastq file with trimmomatic
     tput setaf 6; echo "------START of trimming for ${RNA_PREFIX}"; tput sgr0
-    trimmomatic SE -phred33 -threads 32 ${RNASEQ_FWD} ${RNASEQ_REV} ${RNA_PREFIX}_fpaired.fq.gz ${RNA_PREFIX}_fupaired.fq.gz ${RNA_PREFIX}_funpaired.fq.gz ${RNA_PREFIX}_rpaired.fq.gz ${RNA_PREFIX}_runpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
+    trimmomatic PE -phred33 -threads 32 ${RNASEQ_FWD} ${RNASEQ_REV} ${RNA_PREFIX}_fpaired.fq.gz ${RNA_PREFIX}_funpaired.fq.gz ${RNA_PREFIX}_rpaired.fq.gz ${RNA_PREFIX}_runpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
+    echo "Number of trimmed forward paired reads: " 
+    echo $(zcat ${RNA_PREFIX}_rpaired.fq.gz |wc -l)/4|bc
+    echo "Number of trimmed reverse paired reads: " 
+    echo $(zcat ${RNA_PREFIX}_fpaired.fq.gz |wc -l)/4|bc
     tput setaf 2; echo "------END of  trimming for ${RNA_PREFIX}------"; tput sgr0
     echo
 
