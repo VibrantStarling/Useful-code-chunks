@@ -11,7 +11,7 @@ Pieces of code that make life easier, but I would otherwise probably forget the 
 
 # Genome statistics
 1. [Get No. bp for multiple files](#3)
-2. [Get read coverage for a list of contigs](#4)
+2. [Get average_read coverage](#4)
 3. [Calculate GC content](#5)
 4. [Calculate N50, N90, length, number of contigs and largest contig](#6)
 5. [Calculate average CDS size](#7)
@@ -88,7 +88,14 @@ grep -v ">" ${i} | wc | awk -v var=${i} '{print var," = ",$3-$1}'
 done
 ```
 
-## Get coverage for a metabat bin from megahit final contigs depths <a name="4"></a>
+## Get coverage <a name="4"></a>
+
+### Get coverage of a basic bam file
+```
+samtools depth -a ${BAM} |  awk '{sum+=$3; sumsq+=$3*$3} END { print "Average = ",sum/NR; print "Stdev = ",sqrt(sumsq/NR - (sum/NR)**2)}'
+```
+
+### For a metabat bin from megahit final contigs depths
 ```
 ## get a list of contig names
 grep ">" bin.fa | sed 's/>//g' > contigs.txt
@@ -101,6 +108,7 @@ done
 ## get average bin depth
 cut -f3 bin-depths.txt | awk '{s+=$1}END{print "ave:",s/NR}'
 ```
+
 ## Calculate GC content <a name="5"></a>
 use `gc-calculator.sh` as follows
 ```
