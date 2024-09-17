@@ -2,10 +2,12 @@
 # singularity build funannotate.sif docker://nextgenusfs/funannotate:latest
 
 # get your files in order
-GENOME="genome.fna"
-OUT_DIR="outdir_name"
-SPECIES="Species name"
-STRAIN="strain name"
+GENOME=genome.fna
+OUT_DIR=outdir_name
+SPECIES=Species_name
+STRAIN=strain_name
+GENEMARK_GTF=gtf_name
+ORTHODB=DB_name
 
 ## CLEAN
 # funannotate apparently doesn't like spaces in the fastq headers, so if it fails complaining that the headers don't pair properly, 
@@ -48,7 +50,7 @@ singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/funannotate.sif funannotate pr
 --repeats2evm --organism other
 
 # this will be update gene models, while adding alternate isoforms and utr information
-singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/funannotate.sif funannotate update -i ${OUT_DIR} --cpus 48 --max_intronlen 100000
+singularity exec -B ${PWD}:${PWD},${HOME} ${HOME}/funannotate.sif funannotate update -i ${OUT_DIR} -g ${GENOME} --cpus 48 --max_intronlen 100000
 
 
 # BENEFITS OF FUNANNOTATE over braker3
