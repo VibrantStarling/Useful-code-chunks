@@ -47,7 +47,7 @@ tput setaf 2; echo "softmasking complete"; tput sgr0
 
 # clean and align SRA to the genome
 for RNA_PREFIX in $(cat ${SRA_LIST})
-
+do
     # define the file objects
     RNASEQ_FWD=${RNA_PREFIX}_1.fastq.gz
     RNASEQ_REV=${RNA_PREFIX}_2.fastq.gz
