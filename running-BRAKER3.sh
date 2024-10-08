@@ -29,19 +29,16 @@ chmod +x dfam-tetools.sh
 
 '''
 
-RNA_PREFIX="SRR6493555"
-GENOME="GCF_000006565.2_TGA4_genomic.fna.gz"
-DB=ME49
+RNA_PREFIX=""
+GENOME=""
+DB=""
 
-# trim reads with trimmomatic
+# trim paired end reads with trimmomatic
 for FILE in $(ls rnaseq-dir/*)
 do
-trimmomatic SE -phred33 -threads 32 ${FILE} ${FILE}_qc.fq ILLUMINACLIP:adapters.fasta:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
+trimmomatic PE -phred33 -threads 32 ${RNASEQ_FWD} ${RNASEQ_REV} ${RNA_PREFIX}_fpaired.fq.gz ${RNA_PREFIX}_funpaired.fq.gz ${RNA_PREFIX}_rpaired.fq.gz ${RNA_PREFIX}_runpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
 done
 
-# define the trimmed file objects
-RNASEQ_FWD=${RNA_PREFIX}_1.fastq.fq;
-RNASEQ_REV=${RNA_PREFIX}_2.fastq.fq
 
 # soft mask reads with TETools repeatmodler2 and repeatmasker. 
 #    > can struggle if memory is not fast enough and data may need to be stored on compute HPC nodes
@@ -61,8 +58,8 @@ time hisat2-build ${GENOME} ${IDX}
 # paired with a list of SRA names (SRRXXXXXX) to align 
 for i in $(cat names)
 do 
-RNASEQ_FWD=${i}_1.fastq.gz
-RNASEQ_REV=${i}_2.fastq.gz
+RNASEQ_FWD=${i}_fpaired.fq.gz
+RNASEQ_REV=${i}_rpaired.fq.gz
 time hisat2 -p 32 -q -x ${IDX} -1 ${RNASEQ_FWD} -2 ${RNASEQ_REV} > ${i}-hisat2-rnaseq.sam  2> ${i}-hisat2-align.err
 samtools view -bS ${i}-hisat2-rnaseq.sam -o ${i}-hisat2-rnaseq.bam
 samtools sort ${i}-hisat2-rnaseq.bam -o ${i}-hisat2-rnaseq_sorted.bam
