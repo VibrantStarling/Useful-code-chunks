@@ -52,6 +52,10 @@ do
     RNASEQ_FWD=${RNA_PREFIX}_1.fastq.gz
     RNASEQ_REV=${RNA_PREFIX}_2.fastq.gz
     
+    # remove spaces from the fastq
+    seqkit replace -p "\s.+" ${RNASEQ_FWD} -o ${RNA_PREFIX}_1_clean.fastq.gz
+    seqkit replace -p "\s.+" ${RNASEQ_FWD} -o ${RNA_PREFIX}_1_clean.fastq.gz
+    
     # trim the fastq file with trimmomatic
     tput setaf 6; echo "------START of trimming for ${RNA_PREFIX}"; tput sgr0
     trimmomatic PE -phred33 -threads 32 ${RNASEQ_FWD} ${RNASEQ_REV} ${RNA_PREFIX}_fpaired.fq.gz ${RNA_PREFIX}_funpaired.fq.gz ${RNA_PREFIX}_rpaired.fq.gz ${RNA_PREFIX}_runpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
