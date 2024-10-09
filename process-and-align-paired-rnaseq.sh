@@ -54,7 +54,10 @@ do
     
     # remove spaces from the fastq
     seqkit replace -p "\s.+" ${RNASEQ_FWD} -o ${RNA_PREFIX}_1_clean.fastq.gz
-    seqkit replace -p "\s.+" ${RNASEQ_FWD} -o ${RNA_PREFIX}_1_clean.fastq.gz
+    seqkit replace -p "\s.+" ${RNASEQ_REV} -o ${RNA_PREFIX}_2_clean.fastq.gz
+
+    RNASEQ_FWD=${RNA_PREFIX}_1_clean.fastq.gz
+    RNASEQ_REV=${RNA_PREFIX}_2_clean.fastq.gz
     
     # trim the fastq file with trimmomatic
     tput setaf 6; echo "------START of trimming for ${RNA_PREFIX}"; tput sgr0
