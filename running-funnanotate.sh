@@ -15,7 +15,7 @@ ORTHODB=DB_name
 # this might take a WHILE because these files can be BIG
 for i in $(ls *fastq.gz)
 do
-gunzip < ${i} | sed -e 's/ /_/g' | gzip -c > temp.gz
+unpigz -c ${i} | sed -e 's/ /_/g' | pigz > temp.gz
 mv temp.gz ${i}
 done
 
