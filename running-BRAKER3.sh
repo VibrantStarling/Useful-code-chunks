@@ -1,6 +1,8 @@
 # BRAKER3 pipeline
 
 '''
+# have seqkit installed for fastq file processing to keep trimmomatic happy
+
 # How to run all versions of BRAKER and GALBA (feat. OMArk and BUSCO)
 https://www.youtube.com/watch?v=UXTkJ4mUkyg
 
@@ -34,10 +36,28 @@ GENOME=""
 DB=""
 
 # trim paired end reads with trimmomatic
-for FILE in $(ls rnaseq-dir/*)
+for RNA_PREFIX in $(cat ${SRA_LIST})
 do
-trimmomatic PE -phred33 -threads 32 ${RNASEQ_FWD} ${RNASEQ_REV} ${RNA_PREFIX}_fpaired.fq.gz ${RNA_PREFIX}_funpaired.fq.gz ${RNA_PREFIX}_rpaired.fq.gz ${RNA_PREFIX}_runpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
-done
+    # define the file objects
+    RNASEQ_FWD=${RNA_PREFIX}_1.fastq.gz
+    RNASEQ_REV=${RNA_PREFIX}_2.fastq.gz
+    
+    # remove spaces from the fastq
+    seqkit replace -p "\s.+" ${RNASEQ_FWD} -o ${RNA_PREFIX}_1_clean.fastq.gz
+    seqkit replace -p "\s.+" ${RNASEQ_REV} -o ${RNA_PREFIX}_2_clean.fastq.gz
+
+    RNASEQ_FWD=${RNA_PREFIX}_1_clean.fastq.gz
+    RNASEQ_REV=${RNA_PREFIX}_2_clean.fastq.gz
+    
+    # trim the fastq file with trimmomatic
+    tput setaf 6; echo "------START of trimming for ${RNA_PREFIX}"; tput sgr0
+    trimmomatic PE -phred33 -threads 32 ${RNASEQ_FWD} ${RNASEQ_REV} ${RNA_PREFIX}_fpaired.fq.gz ${RNA_PREFIX}_funpaired.fq.gz ${RNA_PREFIX}_rpaired.fq.gz ${RNA_PREFIX}_runpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:25
+    echo "Number of trimmed forward paired reads: " 
+    echo $(zcat ${RNA_PREFIX}_rpaired.fq.gz |wc -l)/4|bc
+    echo "Number of trimmed reverse paired reads: " 
+    echo $(zcat ${RNA_PREFIX}_fpaired.fq.gz |wc -l)/4|bc
+    tput setaf 2; echo "------END of  trimming for ${RNA_PREFIX}------"; tput sgr0
+    echo
 
 
 # soft mask reads with TETools repeatmodler2 and repeatmasker. 
