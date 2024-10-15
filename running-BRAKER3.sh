@@ -30,12 +30,13 @@ chmod +x dfam-tetools.sh
 ./dfam-tetools.sh
 
 '''
-
-RNA_PREFIX=""
 GENOME=""
 DB=""
+IDX=""
 
 # trim paired end reads with trimmomatic
+# replace TruSeq3-PE.fa with the path to whatever adapter file you're using
+SRA_LIST=sra-list.txt
 for RNA_PREFIX in $(cat ${SRA_LIST})
 do
     # define the file objects
@@ -58,6 +59,7 @@ do
     echo $(zcat ${RNA_PREFIX}_fpaired.fq.gz |wc -l)/4|bc
     tput setaf 2; echo "------END of  trimming for ${RNA_PREFIX}------"; tput sgr0
     echo
+done
 
 
 # soft mask reads with TETools repeatmodler2 and repeatmasker. 
