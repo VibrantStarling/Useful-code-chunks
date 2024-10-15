@@ -77,6 +77,16 @@ GENOME=""
 sed -i 's/\s.*$//' ${GENOME}
 time hisat2-build ${GENOME} ${IDX}
 
+# EVERYTHING IN ONE ALIGNMENT
+NAME=""
+FWD_FILES=$(ls -m SRR*fpaired.fq.gz | sed -s 's/ //g')
+REV_FILES=$(ls -m SRR*rpaired.fq.gz | sed -s 's/ //g')
+time hisat2 -p 32 -q -x ${IDX} -1 ${FWD_FILES} -2 ${REV_FILES} > ${NAME}-hisat2-rnaseq.sam  2> ${NAME}-hisat2-align.err
+samtools view -bS -@ 12 ${NAME}-hisat2-rnaseq.sam -o ${NAME}-hisat2-rnaseq.bam
+samtools sort -@ 12 ${NAME}-hisat2-rnaseq.bam -o ${NAME}-hisat2-rnaseq_sorted.bam
+rm ${NAME}-hisat2-rnaseq.sam; rm ${NAME}-hisat2-rnaseq.bam
+
+# SEPARATE ALIGNMENTS PER FILE
 # paired with a list of SRA names (SRRXXXXXX) to align 
 for i in $(cat names)
 do 
